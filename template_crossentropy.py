@@ -22,8 +22,15 @@ def select_elites(states_batch, actions_batch, rewards_batch, percentile=50):
     (they will become different later).
     """
     # your code here
-    elite_states, elite_actions = None, None
-    assert elite_states is not None and elite_actions is not None
+    threshold = np.percentile(rewards_batch, percentile)
+
+    elite_states = []
+    elite_actions = []
+
+    for states, actions, reward in zip(states_batch, actions_batch, rewards_batch):
+        if reward >= threshold:
+            elite_states.extend(states)
+            elite_actions.extend(actions)
     # your code here
 
     return elite_states, elite_actions
@@ -45,12 +52,20 @@ def update_policy(elite_states, elite_actions, n_states, n_actions):
 
     :returns: new_policy: np.array of shape (n_states, n_actions)
     """
-    # your code here
-    new_policy = None
-    assert new_policy is not None
-    # your code here
+    policy = np.zeros((n_states, n_actions))
+    counts = np.zeros_like(policy, dtype=np.float64)
+    
+    for elite_state, elite_action in zip(elite_states, elite_actions):
+        counts[elite_state, elite_action] +=1
+    for e_s in range(n_states):
+        total = counts[e_s].sum()
+        if total >0:
+            policy[e_s] = counts[e_s] / total 
+        else:
+            policy[e_s] = 1/n_actions 
 
-    return new_policy
+
+    return policy
 
 def generate_session(env, policy, t_max=int(10**4)):
     """
@@ -67,8 +82,8 @@ def generate_session(env, policy, t_max=int(10**4)):
 
     for t in range(t_max):
         # your code here - sample action from policy and get new state, reward, done flag etc. from the environment
-        new_s, r, done = None, None, None
-        a = None
+        a = np.random.choice(range(policy.shape[1]), p=policy[s])
+        new_s, r, done, truncated, info = env.step(a)
         assert new_s is not None and r is not None and done is not None
         assert a is not None
         # your code here
