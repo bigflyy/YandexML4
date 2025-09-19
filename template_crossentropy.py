@@ -5,6 +5,7 @@ import numpy as np
 n_states = 500 # for Taxi-v3
 n_actions = 6 # for Taxi-v3
 
+
 def select_elites(states_batch, actions_batch, rewards_batch, percentile=50):
     """
     Select states and actions from games that have rewards >= percentile
